@@ -1,0 +1,481 @@
+# ShipNow — Backend III
+
+API REST desarrollada como parte de la **Pre-entrega Módulo 1 de Backend III**.
+
+El objetivo de esta entrega es refactorizar una API básica hacia una arquitectura profesional por capas, separando responsabilidades entre **Controllers, Services y Repositories**, además de centralizar y validar la configuración mediante variables de entorno.
+
+---
+
+## Tecnologías utilizadas
+
+- Node.js
+- Express
+- MongoDB
+- Mongoose
+- dotenv
+- JavaScript ES Modules
+- Postman
+
+---
+
+## Arquitectura
+
+El proyecto utiliza una arquitectura de tres capas:
+
+```text
+Request HTTP
+     │
+     ▼
+ Controller
+     │
+     ▼
+ Service
+     │
+     ▼
+ Repository
+     │
+     ▼
+ MongoDB / Mongoose
+```
+
+### Controller
+
+Es la puerta de entrada HTTP de la aplicación.
+
+Se encarga de:
+
+- Recibir `req` y `res`.
+- Obtener parámetros y datos del request.
+- Invocar los métodos del Service.
+- Devolver los códigos HTTP y respuestas correspondientes.
+
+El Controller no tiene acceso directo a Mongoose ni a MongoDB.
+
+### Service
+
+Contiene la lógica de negocio de la aplicación.
+
+Se encarga de:
+
+- Aplicar reglas de negocio.
+- Procesar los datos antes de enviarlos al Repository.
+- Determinar el estado de los productos según su stock.
+- Filtrar productos sin stock al obtener el listado.
+
+El Service se comunica únicamente con el Repository.
+
+### Repository
+
+Es la única capa que conoce Mongoose y los modelos.
+
+Se encarga de:
+
+- Consultar documentos.
+- Crear registros.
+- Actualizar registros.
+- Eliminar registros.
+- Encapsular el acceso a MongoDB.
+- Evitar exponer detalles de persistencia al Service y Controller.
+
+---
+
+## Estructura del proyecto
+
+```text
+proyecto/
+│
+├── src/
+│   ├── config/
+│   │   └── env.config.js
+│   │
+│   ├── constants/
+│   │   └── index.js
+│   │
+│   ├── controllers/
+│   │   ├── product.controller.js
+│   │   └── user.controller.js
+│   │
+│   ├── models/
+│   │   ├── product.model.js
+│   │   └── user.model.js
+│   │
+│   ├── repositories/
+│   │   ├── product.repository.js
+│   │   └── user.repository.js
+│   │
+│   ├── routes/
+│   │   ├── products.js
+│   │   └── users.js
+│   │
+│   ├── services/
+│   │   ├── product.service.js
+│   │   └── user.service.js
+│   │
+│   ├── app.js
+│   └── server.js
+│
+├── .env.example
+├── .gitignore
+├── package.json
+└── README.md
+```
+
+---
+
+## Configuración del entorno
+
+La configuración se encuentra centralizada en:
+
+```text
+src/config/env.config.js
+```
+
+Este módulo utiliza `dotenv` para cargar las variables del archivo `.env` y valida que estén presentes las variables necesarias:
+
+- `PORT`
+- `MONGODB_URI`
+- `NODE_ENV`
+
+Si alguna variable requerida no está definida, la aplicación lanza un error indicando cuál falta y evita que el servidor se inicie.
+
+### Archivo `.env`
+
+Crear un archivo `.env` en la raíz del proyecto:
+
+```env
+PORT=3000
+MONGODB_URI=mongodb://127.0.0.1:27017/shipnow
+NODE_ENV=development
+```
+
+El archivo `.env` **no debe subirse al repositorio**.
+
+Está incluido en `.gitignore` para evitar publicar información de configuración.
+
+### `.env.example`
+
+El repositorio incluye un archivo `.env.example` como referencia:
+
+```env
+PORT=
+MONGODB_URI=
+NODE_ENV=
+```
+
+---
+
+## Instalación
+
+Clonar el repositorio:
+
+```bash
+git clone <URL_DEL_REPOSITORIO>
+```
+
+Ingresar al proyecto:
+
+```bash
+cd proyecto
+```
+
+Instalar las dependencias:
+
+```bash
+npm install
+```
+
+Crear el archivo `.env` a partir de `.env.example` y completar las variables necesarias.
+
+---
+
+## Ejecución
+
+Para iniciar el servidor en modo desarrollo:
+
+```bash
+npm run dev
+```
+
+El proyecto utiliza Node.js con el modo `--watch` para detectar cambios automáticamente.
+
+Servidor:
+
+```text
+http://localhost:3000
+```
+
+---
+
+# Endpoints
+
+## Productos
+
+Ruta base:
+
+```text
+/api/products
+```
+
+### Obtener todos los productos
+
+```http
+GET /api/products
+```
+
+Devuelve los productos disponibles según las reglas definidas en el Service.
+
+### Obtener producto por ID
+
+```http
+GET /api/products/:id
+```
+
+Ejemplo:
+
+```http
+GET /api/products/ID_DEL_PRODUCTO
+```
+
+### Crear producto
+
+```http
+POST /api/products
+```
+
+Ejemplo de body:
+
+```json
+{
+  "title": "Notebook",
+  "description": "Notebook para trabajo",
+  "price": 500000,
+  "stock": 10
+}
+```
+
+El estado del producto se determina automáticamente según el stock.
+
+Si el stock es mayor a `0`:
+
+```text
+AVAILABLE
+```
+
+Si el stock es `0`:
+
+```text
+OUT_OF_STOCK
+```
+
+### Actualizar producto
+
+```http
+PUT /api/products/:id
+```
+
+Ejemplo:
+
+```json
+{
+  "title": "Notebook actualizada",
+  "price": 550000,
+  "stock": 5
+}
+```
+
+Cuando se modifica el stock, el Service vuelve a determinar automáticamente el estado correspondiente.
+
+### Eliminar producto
+
+```http
+DELETE /api/products/:id
+```
+
+---
+
+# Usuarios
+
+Ruta base:
+
+```text
+/api/users
+```
+
+### Obtener todos los usuarios
+
+```http
+GET /api/users
+```
+
+### Obtener usuario por ID
+
+```http
+GET /api/users/:id
+```
+
+### Crear usuario
+
+```http
+POST /api/users
+```
+
+### Actualizar usuario
+
+```http
+PUT /api/users/:id
+```
+
+### Eliminar usuario
+
+```http
+DELETE /api/users/:id
+```
+
+---
+
+# Constantes del dominio
+
+Los valores utilizados por el dominio se encuentran centralizados en:
+
+```text
+src/constants/index.js
+```
+
+Se utilizan objetos inmutables mediante `Object.freeze()`.
+
+Por ejemplo, los roles:
+
+```javascript
+export const USER_ROLES = Object.freeze({
+  ADMIN: "ADMIN",
+  USER: "USER",
+});
+```
+
+Y los estados de productos:
+
+```javascript
+export const PRODUCT_STATUS = Object.freeze({
+  AVAILABLE: "AVAILABLE",
+  OUT_OF_STOCK: "OUT_OF_STOCK",
+});
+```
+
+Esto evita utilizar strings mágicos repetidos a lo largo de la aplicación.
+
+---
+
+# Decisiones de arquitectura
+
+La separación entre Service y Repository permite mantener responsabilidades claras.
+
+El **Repository** se ocupa exclusivamente de la persistencia y de las operaciones relacionadas con MongoDB/Mongoose.
+
+Por otro lado, el **Service** contiene las reglas de negocio.
+
+Por ejemplo, al obtener productos, el Repository recupera los datos desde MongoDB, mientras que el Service puede aplicar una regla como excluir productos que no tengan stock.
+
+De esta manera:
+
+```text
+Controller
+    ↓
+Service
+    ↓
+Repository
+    ↓
+MongoDB
+```
+
+Cada capa tiene una responsabilidad específica y puede modificarse sin afectar directamente a las demás.
+
+---
+
+# Flujo de creación de un producto
+
+Cuando llega una petición:
+
+```http
+POST /api/products
+```
+
+el flujo es:
+
+```text
+Router
+   ↓
+ProductController
+   ↓
+ProductService
+   ↓
+ProductRepository
+   ↓
+Product Model
+   ↓
+MongoDB
+```
+
+El Controller recibe la petición.
+
+El Service determina las reglas de negocio, como el estado del producto según su stock.
+
+El Repository realiza la operación de persistencia utilizando Mongoose.
+
+---
+
+# Pruebas
+
+Los endpoints fueron probados utilizando **Postman**.
+
+Se verificaron operaciones CRUD para usuarios y productos, incluyendo:
+
+- Obtener registros.
+- Obtener un registro por ID.
+- Crear registros.
+- Actualizar registros.
+- Eliminar registros.
+- Manejo de recursos inexistentes.
+- Conexión con MongoDB.
+- Validación de variables de entorno.
+
+---
+
+# Variables de entorno
+
+No se deben almacenar credenciales ni configuraciones privadas directamente en el repositorio.
+
+El archivo:
+
+```text
+.env
+```
+
+está incluido en `.gitignore`.
+
+El repositorio solamente contiene:
+
+```text
+.env.example
+```
+
+como referencia para configurar el entorno local.
+
+---
+
+# Estado del proyecto
+
+Proyecto realizado para la:
+
+**Pre-entrega Módulo 1 — Estructura Profesional de ShipNow**
+
+Objetivos principales cumplidos:
+
+- Arquitectura Controller → Service → Repository.
+- Separación de responsabilidades.
+- Configuración de entorno centralizada.
+- Validación de variables de entorno.
+- Constantes de dominio.
+- Integración con MongoDB mediante Mongoose.
+- Refactorización de las entidades Products y Users.
+- `.env` excluido del repositorio.
+- `.env.example` disponible para configuración.
