@@ -1,11 +1,3 @@
-# ShipNow — Backend III
-
-API REST desarrollada como parte de la **Pre-entrega Módulo 1 de Backend III**.
-
-El objetivo de esta entrega es refactorizar una API básica hacia una arquitectura profesional por capas, separando responsabilidades entre **Controllers, Services y Repositories**, además de centralizar y validar la configuración mediante variables de entorno.
-
----
-
 ## Tecnologías utilizadas
 
 - Node.js
@@ -14,29 +6,32 @@ El objetivo de esta entrega es refactorizar una API básica hacia una arquitectu
 - Mongoose
 - dotenv
 - JavaScript ES Modules
+- Faker.js
 - Postman
+- MongoDB Compass
 
 ---
 
 ## Arquitectura
 
-El proyecto utiliza una arquitectura de tres capas:
+El proyecto utiliza una arquitectura por capas:
 
-```text
 Request HTTP
-     │
-     ▼
- Controller
-     │
-     ▼
- Service
-     │
-     ▼
- Repository
-     │
-     ▼
- MongoDB / Mongoose
-```
+│
+▼
+Router
+│
+▼
+Controller
+│
+▼
+Service
+│
+▼
+Repository
+│
+▼
+MongoDB / Mongoose
 
 ### Controller
 
@@ -44,12 +39,12 @@ Es la puerta de entrada HTTP de la aplicación.
 
 Se encarga de:
 
-- Recibir `req` y `res`.
+- Recibir req y res.
 - Obtener parámetros y datos del request.
 - Invocar los métodos del Service.
 - Devolver los códigos HTTP y respuestas correspondientes.
 
-El Controller no tiene acceso directo a Mongoose ni a MongoDB.
+El Controller no accede directamente a MongoDB.
 
 ### Service
 
@@ -57,68 +52,70 @@ Contiene la lógica de negocio de la aplicación.
 
 Se encarga de:
 
+- Procesar los datos.
 - Aplicar reglas de negocio.
-- Procesar los datos antes de enviarlos al Repository.
-- Determinar el estado de los productos según su stock.
-- Filtrar productos sin stock al obtener el listado.
-
-El Service se comunica únicamente con el Repository.
+- Generar datos simulados.
+- Coordinar la creación de usuarios, pedidos y entregas durante el seed.
 
 ### Repository
 
-Es la única capa que conoce Mongoose y los modelos.
+Es la capa encargada del acceso a los modelos de Mongoose.
 
 Se encarga de:
 
-- Consultar documentos.
 - Crear registros.
+- Consultar registros.
 - Actualizar registros.
 - Eliminar registros.
 - Encapsular el acceso a MongoDB.
-- Evitar exponer detalles de persistencia al Service y Controller.
 
 ---
 
 ## Estructura del proyecto
 
-```text
 proyecto/
 │
 ├── src/
-│   ├── config/
-│   │   └── env.config.js
-│   │
-│   ├── constants/
-│   │   └── index.js
-│   │
-│   ├── controllers/
-│   │   ├── product.controller.js
-│   │   └── user.controller.js
-│   │
-│   ├── models/
-│   │   ├── product.model.js
-│   │   └── user.model.js
-│   │
-│   ├── repositories/
-│   │   ├── product.repository.js
-│   │   └── user.repository.js
-│   │
-│   ├── routes/
-│   │   ├── products.js
-│   │   └── users.js
-│   │
-│   ├── services/
-│   │   ├── product.service.js
-│   │   └── user.service.js
-│   │
-│   ├── app.js
-│   └── server.js
+│ ├── config/
+│ │ └── env.config.js
+│ │
+│ ├── constants/
+│ │ └── index.js
+│ │
+│ ├── controllers/
+│ │ ├── product.controller.js
+│ │ ├── user.controller.js
+│ │ └── mock.controller.js
+│ │
+│ ├── models/
+│ │ ├── product.model.js
+│ │ ├── user.model.js
+│ │ ├── order.model.js
+│ │ └── delivery.model.js
+│ │
+│ ├── repositories/
+│ │ ├── product.repository.js
+│ │ ├── user.repository.js
+│ │ ├── order.repository.js
+│ │ └── delivery.repository.js
+│ │
+│ ├── routes/
+│ │ ├── products.js
+│ │ ├── users.js
+│ │ └── mocks.js
+│ │
+│ ├── services/
+│ │ ├── product.service.js
+│ │ ├── user.service.js
+│ │ └── mock.service.js
+│ │
+│ ├── app.js
+│ └── server.js
 │
 ├── .env.example
 ├── .gitignore
 ├── package.json
 └── README.md
-```
 
 ---
 
@@ -126,41 +123,35 @@ proyecto/
 
 La configuración se encuentra centralizada en:
 
-```text
 src/config/env.config.js
-```
 
-Este módulo utiliza `dotenv` para cargar las variables del archivo `.env` y valida que estén presentes las variables necesarias:
+Las variables de entorno utilizadas por la aplicación son:
 
-- `PORT`
-- `MONGODB_URI`
-- `NODE_ENV`
+- PORT
+- MONGODB_URI
+- NODE_ENV
 
-Si alguna variable requerida no está definida, la aplicación lanza un error indicando cuál falta y evita que el servidor se inicie.
+Si alguna variable requerida no está definida, la aplicación informa el error y evita iniciar el servidor.
 
-### Archivo `.env`
+### Archivo .env
 
-Crear un archivo `.env` en la raíz del proyecto:
+Crear un archivo .env en la raíz del proyecto:
 
-```env
 PORT=3000
 MONGODB_URI=mongodb://127.0.0.1:27017/shipnow
 NODE_ENV=development
-```
 
-El archivo `.env` **no debe subirse al repositorio**.
+El archivo .env no debe subirse al repositorio.
 
-Está incluido en `.gitignore` para evitar publicar información de configuración.
+### .env.example
 
-### `.env.example`
+El repositorio incluye:
 
-El repositorio incluye un archivo `.env.example` como referencia:
-
-```env
 PORT=
 MONGODB_URI=
 NODE_ENV=
-```
+
+como referencia para configurar el entorno local.
 
 ---
 
@@ -168,23 +159,17 @@ NODE_ENV=
 
 Clonar el repositorio:
 
-```bash
 git clone <URL_DEL_REPOSITORIO>
-```
 
 Ingresar al proyecto:
 
-```bash
 cd proyecto
-```
 
 Instalar las dependencias:
 
-```bash
 npm install
-```
 
-Crear el archivo `.env` a partir de `.env.example` y completar las variables necesarias.
+Crear el archivo .env a partir de .env.example y completar las variables necesarias.
 
 ---
 
@@ -192,17 +177,11 @@ Crear el archivo `.env` a partir de `.env.example` y completar las variables nec
 
 Para iniciar el servidor en modo desarrollo:
 
-```bash
 npm run dev
-```
-
-El proyecto utiliza Node.js con el modo `--watch` para detectar cambios automáticamente.
 
 Servidor:
 
-```text
 http://localhost:3000
-```
 
 ---
 
@@ -212,84 +191,36 @@ http://localhost:3000
 
 Ruta base:
 
-```text
 /api/products
-```
 
 ### Obtener todos los productos
 
-```http
 GET /api/products
-```
-
-Devuelve los productos disponibles según las reglas definidas en el Service.
 
 ### Obtener producto por ID
 
-```http
 GET /api/products/:id
-```
-
-Ejemplo:
-
-```http
-GET /api/products/ID_DEL_PRODUCTO
-```
 
 ### Crear producto
 
-```http
 POST /api/products
-```
-
-Ejemplo de body:
-
-```json
-{
-  "title": "Notebook",
-  "description": "Notebook para trabajo",
-  "price": 500000,
-  "stock": 10
-}
-```
-
-El estado del producto se determina automáticamente según el stock.
-
-Si el stock es mayor a `0`:
-
-```text
-AVAILABLE
-```
-
-Si el stock es `0`:
-
-```text
-OUT_OF_STOCK
-```
-
-### Actualizar producto
-
-```http
-PUT /api/products/:id
-```
 
 Ejemplo:
 
-```json
 {
-  "title": "Notebook actualizada",
-  "price": 550000,
-  "stock": 5
+"title": "Notebook",
+"description": "Notebook para trabajo",
+"price": 500000,
+"stock": 10
 }
-```
 
-Cuando se modifica el stock, el Service vuelve a determinar automáticamente el estado correspondiente.
+### Actualizar producto
+
+PUT /api/products/:id
 
 ### Eliminar producto
 
-```http
 DELETE /api/products/:id
-```
 
 ---
 
@@ -297,129 +228,239 @@ DELETE /api/products/:id
 
 Ruta base:
 
-```text
 /api/users
-```
 
 ### Obtener todos los usuarios
 
-```http
 GET /api/users
-```
 
 ### Obtener usuario por ID
 
-```http
 GET /api/users/:id
-```
 
 ### Crear usuario
 
-```http
 POST /api/users
-```
 
 ### Actualizar usuario
 
-```http
 PUT /api/users/:id
-```
 
 ### Eliminar usuario
 
-```http
 DELETE /api/users/:id
-```
 
 ---
 
-# Constantes del dominio
+# Mocking
+
+El proyecto incorpora un sistema de generación de datos de prueba utilizando **Faker.js**.
+
+La funcionalidad de mocking se encuentra separada en:
+
+MockController
+↓
+MockService
+↓
+Repositories
+↓
+MongoDB
+
+La generación de datos simulados no depende directamente del Router.
+
+## Generar usuarios simulados
+
+### Obtener un usuario simulado
+
+GET /api/mocks/users
+
+La respuesta contiene un usuario generado dinámicamente y no se persiste en MongoDB.
+
+Ejemplo:
+
+{
+"status": "success",
+"payload": [
+{
+"firstName": "Tyler",
+"lastName": "Lind",
+"email": "example@gmail.com",
+"password": "example",
+"role": "CUSTOMER"
+}
+]
+}
+
+### Generar una cantidad determinada
+
+GET /api/mocks/users?qty=5
+
+El parámetro qty determina la cantidad de usuarios simulados.
+
+El valor máximo permitido es:
+
+100
+
+Si se supera el límite:
+
+GET /api/mocks/users?qty=101
+
+la API responde con:
+
+{
+"status": "error",
+"message": "qty no puede ser mayor que 100"
+}
+
+---
+
+# Seed de datos
+
+El endpoint de seed permite generar datos de prueba y almacenarlos en MongoDB.
+
+POST /api/mocks/seed
+
+También permite indicar la cantidad mediante qty.
+
+Ejemplo:
+
+POST /api/mocks/seed?qty=3
+
+La operación genera datos relacionados entre sí:
+
+- Usuarios CUSTOMER.
+- Un usuario DRIVER.
+- Pedidos asociados a los clientes.
+- Entregas asociadas a los pedidos y al driver.
+
+Ejemplo de respuesta:
+
+{
+"status": "success",
+"message": "Datos de prueba generados correctamente",
+"payload": {
+"usuarios": 4,
+"pedidos": 3,
+"entregas": 3
+}
+}
+
+La cantidad de usuarios incluye los clientes generados más el driver utilizado para las entregas.
+
+---
+
+# Relaciones entre los datos
+
+Los datos generados por el seed mantienen relaciones mediante referencias de MongoDB.
+
+User (CUSTOMER)
+│
+▼
+Order
+│
+▼
+Delivery
+│
+▼
+User (DRIVER)
+
+Los pedidos contienen una referencia al usuario cliente:
+
+customer → ObjectId(User)
+
+Las entregas contienen referencias al pedido y al conductor:
+
+order → ObjectId(Order)
+driver → ObjectId(User)
+
+Esto permite generar datos de prueba coherentes con las relaciones definidas en los modelos.
+
+---
+
+# Estados y prioridades
 
 Los valores utilizados por el dominio se encuentran centralizados en:
 
-```text
 src/constants/index.js
-```
 
-Se utilizan objetos inmutables mediante `Object.freeze()`.
+Se utilizan objetos inmutables mediante Object.freeze().
 
-Por ejemplo, los roles:
+### Roles
 
-```javascript
 export const USER_ROLES = Object.freeze({
-  ADMIN: "ADMIN",
-  USER: "USER",
+ADMIN: "ADMIN",
+CUSTOMER: "CUSTOMER",
+DRIVER: "DRIVER",
+STORE: "STORE",
 });
-```
 
-Y los estados de productos:
+### Estados de pedidos
 
-```javascript
-export const PRODUCT_STATUS = Object.freeze({
-  AVAILABLE: "AVAILABLE",
-  OUT_OF_STOCK: "OUT_OF_STOCK",
+export const ORDER_STATUS = Object.freeze({
+CREATED: "CREATED",
+ASSIGNED: "ASSIGNED",
+PICKED_UP: "PICKED_UP",
+IN_TRANSIT: "IN_TRANSIT",
+DELIVERED: "DELIVERED",
+CANCELLED: "CANCELLED",
 });
-```
 
-Esto evita utilizar strings mágicos repetidos a lo largo de la aplicación.
+### Estado de entregas
+
+export const DELIVERY_STATUS = Object.freeze({
+ASSIGNED: "ASSIGNED",
+});
+
+### Prioridades
+
+export const DELIVERY_PRIORITY = Object.freeze({
+LOW: "LOW",
+NORMAL: "NORMAL",
+HIGH: "HIGH",
+});
+
+Centralizar estos valores evita utilizar strings mágicos repetidos dentro de la aplicación.
 
 ---
 
-# Decisiones de arquitectura
+# Flujo del Mocking
 
-La separación entre Service y Repository permite mantener responsabilidades claras.
+## Generación de usuarios
 
-El **Repository** se ocupa exclusivamente de la persistencia y de las operaciones relacionadas con MongoDB/Mongoose.
+GET /api/mocks/users
+│
+▼
+MockController
+│
+▼
+MockService
+│
+▼
+Faker
+│
+▼
+Datos simulados
 
-Por otro lado, el **Service** contiene las reglas de negocio.
+Estos datos se generan en memoria y no se almacenan en MongoDB.
 
-Por ejemplo, al obtener productos, el Repository recupera los datos desde MongoDB, mientras que el Service puede aplicar una regla como excluir productos que no tengan stock.
+## Seed
 
-De esta manera:
-
-```text
-Controller
-    ↓
-Service
-    ↓
-Repository
-    ↓
+POST /api/mocks/seed
+│
+▼
+MockController
+│
+▼
+MockService
+│
+├──► UserRepository
+│
+├──► OrderRepository
+│
+└──► DeliveryRepository
+│
+▼
 MongoDB
-```
-
-Cada capa tiene una responsabilidad específica y puede modificarse sin afectar directamente a las demás.
-
----
-
-# Flujo de creación de un producto
-
-Cuando llega una petición:
-
-```http
-POST /api/products
-```
-
-el flujo es:
-
-```text
-Router
-   ↓
-ProductController
-   ↓
-ProductService
-   ↓
-ProductRepository
-   ↓
-Product Model
-   ↓
-MongoDB
-```
-
-El Controller recibe la petición.
-
-El Service determina las reglas de negocio, como el estado del producto según su stock.
-
-El Repository realiza la operación de persistencia utilizando Mongoose.
 
 ---
 
@@ -427,16 +468,53 @@ El Repository realiza la operación de persistencia utilizando Mongoose.
 
 Los endpoints fueron probados utilizando **Postman**.
 
-Se verificaron operaciones CRUD para usuarios y productos, incluyendo:
+Se verificaron:
 
-- Obtener registros.
-- Obtener un registro por ID.
-- Crear registros.
-- Actualizar registros.
-- Eliminar registros.
-- Manejo de recursos inexistentes.
-- Conexión con MongoDB.
-- Validación de variables de entorno.
+### Usuarios
+
+- GET /api/users
+
+### Mocking
+
+- GET /api/mocks/users
+- GET /api/mocks/users?qty=5
+- Validación del límite máximo mediante qty=101
+
+### Seed
+
+- POST /api/mocks/seed?qty=1
+- POST /api/mocks/seed?qty=3
+
+También se verificó mediante MongoDB Compass que:
+
+- Los usuarios se almacenan correctamente.
+- Los pedidos contienen referencias a usuarios.
+- Las entregas contienen referencias a pedidos y drivers.
+- Los estados y prioridades utilizan valores válidos.
+
+---
+
+# Decisiones de arquitectura
+
+La separación entre Controller, Service y Repository permite mantener responsabilidades claras.
+
+El Controller administra la comunicación HTTP.
+
+El Service contiene la lógica de negocio y generación de datos.
+
+El Repository encapsula el acceso a MongoDB mediante Mongoose.
+
+De esta manera:
+
+Controller
+↓
+Service
+↓
+Repository
+↓
+MongoDB
+
+La funcionalidad de mocking mantiene la misma separación de responsabilidades.
 
 ---
 
@@ -446,17 +524,13 @@ No se deben almacenar credenciales ni configuraciones privadas directamente en e
 
 El archivo:
 
-```text
 .env
-```
 
-está incluido en `.gitignore`.
+está incluido en .gitignore.
 
-El repositorio solamente contiene:
+El repositorio contiene:
 
-```text
 .env.example
-```
 
 como referencia para configurar el entorno local.
 
@@ -464,18 +538,28 @@ como referencia para configurar el entorno local.
 
 # Estado del proyecto
 
-Proyecto realizado para la:
+Proyecto **ShipNow — Backend III**.
 
-**Pre-entrega Módulo 1 — Estructura Profesional de ShipNow**
+## Módulo 1
 
-Objetivos principales cumplidos:
-
-- Arquitectura Controller → Service → Repository.
-- Separación de responsabilidades.
+- Arquitectura por capas.
+- Separación Controller → Service → Repository.
 - Configuración de entorno centralizada.
 - Validación de variables de entorno.
 - Constantes de dominio.
 - Integración con MongoDB mediante Mongoose.
-- Refactorización de las entidades Products y Users.
-- `.env` excluido del repositorio.
-- `.env.example` disponible para configuración.
+- Refactorización de Products y Users.
+- .env excluido del repositorio.
+
+## Módulo 2
+
+- Generación de datos simulados con Faker.js.
+- Separación de la funcionalidad de mocking por capas.
+- Router dedicado /api/mocks.
+- Generación de usuarios simulados.
+- Generación de usuarios, pedidos y entregas mediante seed.
+- Persistencia de datos generados en MongoDB.
+- Relaciones mediante ObjectId.
+- Validación de cantidades generadas.
+- Uso de constantes para roles, estados y prioridades.
+- Verificación de datos mediante Postman y MongoDB Compass.
