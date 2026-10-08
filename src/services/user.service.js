@@ -1,4 +1,5 @@
 import UserRepository from "../repositories/user.repository.js";
+import { UserNotFoundError } from "../errors/domain.errors.js";
 
 class UserService {
   constructor() {
@@ -10,7 +11,13 @@ class UserService {
   }
 
   async getById(id) {
-    return await this.userRepository.getById(id);
+    const user = await this.userRepository.getById(id);
+
+    if (!user) {
+      throw new UserNotFoundError();
+    }
+
+    return user;
   }
 
   async create(data) {
@@ -18,11 +25,23 @@ class UserService {
   }
 
   async update(id, data) {
-    return await this.userRepository.update(id, data);
+    const user = await this.userRepository.update(id, data);
+
+    if (!user) {
+      throw new UserNotFoundError();
+    }
+
+    return user;
   }
 
   async delete(id) {
-    return await this.userRepository.delete(id);
+    const user = await this.userRepository.delete(id);
+
+    if (!user) {
+      throw new UserNotFoundError();
+    }
+
+    return user;
   }
 }
 

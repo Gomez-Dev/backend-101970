@@ -1,5 +1,6 @@
 import ProductRepository from "../repositories/product.repository.js";
 import { PRODUCT_STATUS } from "../constants/index.js";
+import { ProductNotFoundError } from "../errors/domain.errors.js";
 
 class ProductService {
   constructor() {
@@ -13,7 +14,13 @@ class ProductService {
   }
 
   async getProductById(id) {
-    return await this.productRepository.getById(id);
+    const product = await this.productRepository.getById(id);
+
+    if (!product) {
+      throw new ProductNotFoundError();
+    }
+
+    return product;
   }
 
   async createProduct(data) {
@@ -34,11 +41,23 @@ class ProductService {
         data.stock > 0 ? PRODUCT_STATUS.AVAILABLE : PRODUCT_STATUS.OUT_OF_STOCK;
     }
 
-    return await this.productRepository.update(id, productData);
+    const product = await this.productRepository.update(id, productData);
+
+    if (!product) {
+      throw new ProductNotFoundError();
+    }
+
+    return product;
   }
 
   async deleteProduct(id) {
-    return await this.productRepository.delete(id);
+    const product = await this.productRepository.delete(id);
+
+    if (!product) {
+      throw new ProductNotFoundError();
+    }
+
+    return product;
   }
 }
 
