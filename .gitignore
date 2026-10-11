@@ -1,2 +1,6 @@
 node_modules/
 .env
+
+# Logs generados por winston
+logs/*.log
+logs/*.json

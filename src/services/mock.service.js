@@ -18,6 +18,8 @@ import {
   DatabaseError,
 } from "../errors/domain.errors.js";
 
+import logger from "../config/logger.config.js";
+
 class MockService {
   constructor() {
     this.userRepository = new UserRepository();
@@ -27,10 +29,14 @@ class MockService {
 
   validateQuantity(quantity) {
     if (!Number.isInteger(quantity) || quantity <= 0) {
+      logger.warning(`Cantidad de mocks inválida: ${quantity}`);
       throw new InvalidMockQuantityError();
     }
 
     if (quantity > MOCK_MAX_QUANTITY) {
+      logger.warning(
+        `Cantidad de mocks superior al límite: ${quantity}. Máximo permitido: ${MOCK_MAX_QUANTITY}`,
+      );
       throw new MockQuantityExceededError();
     }
   }
@@ -85,11 +91,21 @@ class MockService {
   generateUsers(quantity) {
     this.validateQuantity(quantity);
 
-    return Array.from({ length: quantity }, () => this.generateMockUser());
+    logger.debug(`Generando ${quantity} usuarios simulados`);
+
+    const users = Array.from({ length: quantity }, () =>
+      this.generateMockUser(),
+    );
+
+    logger.info(`Se generaron ${users.length} usuarios simulados`);
+
+    return users;
   }
 
   async seed(quantity) {
     this.validateQuantity(quantity);
+
+    logger.debug(`Iniciando seed de datos. Cantidad solicitada: ${quantity}`);
 
     try {
       const customers = [];
@@ -126,6 +142,10 @@ class MockService {
         deliveries.push(delivery);
       }
 
+      logger.info(
+        `Seed completado: ${customers.length + 1} usuarios, ${orders.length} pedidos y ${deliveries.length} entregas`,
+      );
+
       return {
         customers,
         driver,
@@ -133,6 +153,10 @@ class MockService {
         deliveries,
       };
     } catch (error) {
+      logger.error(`Error durante el seed: ${error.message}`, {
+        stack: error.stack,
+      });
+
       throw new DatabaseError();
     }
   }

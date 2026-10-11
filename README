@@ -1,161 +1,31 @@
 # Backend III
 
-API backend para la gestión de productos, usuarios y datos de prueba de una plataforma logística.
+API REST desarrollada con Node.js, Express y MongoDB para gestionar productos, usuarios y datos de prueba de una plataforma logística.
 
-El proyecto utiliza una arquitectura por capas y se desarrolla progresivamente como parte del curso Backend III.
+## Tecnologías
 
----
-
-## Tecnologías utilizadas
-
-- Node.js
-- Express
-- MongoDB
-- Mongoose
-- dotenv
-- JavaScript ES Modules
-- Faker.js
-- Postman
-- MongoDB Compass
-
----
+Node.js · Express · MongoDB · Mongoose · dotenv · Faker.js · Winston · Postman
 
 ## Arquitectura
 
-El proyecto utiliza una arquitectura por capas:
+Router → Controller → Service → Repository → MongoDB
 
-```text
-Request HTTP
-     ↓
-   Router
-     ↓
- Controller
-     ↓
-   Service
-     ↓
- Repository
-     ↓
-MongoDB / Mongoose
+- **Router:** define los endpoints.
+- **Controller:** gestiona las solicitudes y respuestas HTTP exitosas.
+- **Service:** contiene la lógica de negocio y las validaciones.
+- **Repository:** encapsula el acceso a MongoDB.
+- **Errors:** centraliza los errores de dominio y el middleware global.
+- **Config:** centraliza las variables de entorno y la configuración del logger.
+
+## Instalación y ejecución
+
+```bash
+git clone https://github.com/Gomez-Dev/backend-101970.git
+cd backend-101970
+npm install
 ```
 
-### Controller
-
-Es la puerta de entrada HTTP de la aplicación.
-
-Se encarga de:
-
-- Recibir `req` y `res`.
-- Obtener parámetros y datos del request.
-- Invocar los métodos del Service.
-- Generar las respuestas exitosas.
-
-Los errores son derivados al middleware global de manejo de errores.
-
-El Controller no accede directamente a MongoDB.
-
-### Service
-
-Contiene la lógica de negocio de la aplicación.
-
-Se encarga de:
-
-- Procesar los datos.
-- Aplicar reglas de negocio.
-- Generar datos simulados.
-- Validar reglas relacionadas con la generación de mocks.
-- Coordinar la creación de usuarios, pedidos y entregas durante el seed.
-- Detectar errores de dominio correspondientes a la lógica de negocio.
-
-### Repository
-
-Es la capa encargada de encapsular el acceso a los modelos de Mongoose.
-
-Se encarga de:
-
-- Encapsular las operaciones de acceso a MongoDB.
-- Crear registros.
-- Consultar registros.
-- Actualizar registros.
-- Eliminar registros.
-- Mantener aislado el acceso a los modelos de Mongoose.
-
----
-
-## Estructura del proyecto
-
-```text
-proyecto/
-│
-├── src/
-│   ├── config/
-│   │   └── env.config.js
-│   │
-│   ├── constants/
-│   │   └── index.js
-│   │
-│   ├── controllers/
-│   │   ├── product.controller.js
-│   │   ├── user.controller.js
-│   │   └── mock.controller.js
-│   │
-│   ├── errors/
-│   │   ├── custom.error.js
-│   │   ├── domain.errors.js
-│   │   ├── error.dictionary.js
-│   │   └── error.middleware.js
-│   │
-│   ├── models/
-│   │   ├── product.model.js
-│   │   ├── user.model.js
-│   │   ├── order.model.js
-│   │   └── delivery.model.js
-│   │
-│   ├── repositories/
-│   │   ├── product.repository.js
-│   │   ├── user.repository.js
-│   │   ├── order.repository.js
-│   │   └── delivery.repository.js
-│   │
-│   ├── routes/
-│   │   ├── products.js
-│   │   ├── users.js
-│   │   └── mocks.js
-│   │
-│   ├── services/
-│   │   ├── product.service.js
-│   │   ├── user.service.js
-│   │   └── mock.service.js
-│   │
-│   ├── app.js
-│   └── server.js
-│
-├── .env.example
-├── .gitignore
-├── package.json
-└── README.md
-```
-
----
-
-## Configuración del entorno
-
-La configuración se encuentra centralizada en:
-
-```text
-src/config/env.config.js
-```
-
-Las variables de entorno utilizadas por la aplicación son:
-
-- `PORT`
-- `MONGODB_URI`
-- `NODE_ENV`
-
-Si alguna variable requerida no está definida, la aplicación informa el error y evita iniciar el servidor.
-
-### Archivo .env
-
-Crear un archivo `.env` en la raíz del proyecto:
+Crear un archivo `.env` en la raíz:
 
 ```env
 PORT=3000
@@ -163,91 +33,29 @@ MONGODB_URI=mongodb://127.0.0.1:27017/backend-iii
 NODE_ENV=development
 ```
 
-El archivo `.env` no debe subirse al repositorio.
-
-### .env.example
-
-El repositorio incluye:
-
-```env
-PORT=
-MONGODB_URI=
-NODE_ENV=
-```
-
-como referencia para configurar el entorno local.
-
----
-
-## Instalación
-
-Clonar el repositorio:
-
-```bash
-git clone <URL_DEL_REPOSITORIO>
-```
-
-Ingresar al proyecto:
-
-```bash
-cd proyecto
-```
-
-Instalar las dependencias:
-
-```bash
-npm install
-```
-
-Crear el archivo `.env` a partir de `.env.example` y completar las variables necesarias.
-
----
-
-## Ejecución
-
-Para iniciar el servidor en modo desarrollo:
+Iniciar en desarrollo:
 
 ```bash
 npm run dev
 ```
 
-Servidor:
+La API estará disponible en `http://localhost:3000`.
 
-```text
-http://localhost:3000
-```
+No subir `.env` al repositorio. Usar `.env.example` como referencia.
 
----
+## Endpoints principales
 
-# Endpoints
+### Productos — `/api/products`
 
-## Productos
+| Método | Ruta                | Acción              |
+| ------ | ------------------- | ------------------- |
+| GET    | `/api/products`     | Listar productos    |
+| GET    | `/api/products/:id` | Obtener un producto |
+| POST   | `/api/products`     | Crear producto      |
+| PUT    | `/api/products/:id` | Actualizar producto |
+| DELETE | `/api/products/:id` | Eliminar producto   |
 
-Ruta base:
-
-```text
-/api/products
-```
-
-### Obtener todos los productos
-
-```http
-GET /api/products
-```
-
-### Obtener producto por ID
-
-```http
-GET /api/products/:id
-```
-
-### Crear producto
-
-```http
-POST /api/products
-```
-
-Ejemplo:
+Ejemplo de creación:
 
 ```json
 {
@@ -258,242 +66,32 @@ Ejemplo:
 }
 ```
 
-### Actualizar producto
+### Usuarios — `/api/users`
 
-```http
-PUT /api/products/:id
-```
+| Método | Ruta             | Acción             |
+| ------ | ---------------- | ------------------ |
+| GET    | `/api/users`     | Listar usuarios    |
+| GET    | `/api/users/:id` | Obtener un usuario |
+| POST   | `/api/users`     | Crear usuario      |
+| PUT    | `/api/users/:id` | Actualizar usuario |
+| DELETE | `/api/users/:id` | Eliminar usuario   |
 
-### Eliminar producto
+### Mocks — `/api/mocks`
 
-```http
-DELETE /api/products/:id
-```
+| Método | Ruta                     | Acción                                          |
+| ------ | ------------------------ | ----------------------------------------------- |
+| GET    | `/api/mocks/users?qty=5` | Generar usuarios simulados en memoria           |
+| POST   | `/api/mocks/seed?qty=3`  | Guardar datos de prueba relacionados en MongoDB |
 
----
+`qty` debe ser un entero mayor que 0 y no puede superar 100. El seed genera clientes, un conductor, pedidos y entregas relacionadas.
 
-# Usuarios
+### Logger — `/api/logger`
 
-Ruta base:
+`GET /api/logger` genera un mensaje de prueba para cada nivel de logging y devuelve una respuesta de confirmación.
 
-```text
-/api/users
-```
+## Manejo de errores
 
-### Obtener todos los usuarios
-
-```http
-GET /api/users
-```
-
-### Obtener usuario por ID
-
-```http
-GET /api/users/:id
-```
-
-### Crear usuario
-
-```http
-POST /api/users
-```
-
-### Actualizar usuario
-
-```http
-PUT /api/users/:id
-```
-
-### Eliminar usuario
-
-```http
-DELETE /api/users/:id
-```
-
----
-
-# Mocking
-
-El proyecto incorpora un sistema de generación de datos de prueba utilizando **Faker.js**.
-
-La funcionalidad de mocking se encuentra separada en:
-
-```text
-MockController
-      ↓
-MockService
-      ↓
-Repositories
-      ↓
-MongoDB
-```
-
-La generación de datos simulados no depende directamente del Router.
-
-## Generar usuarios simulados
-
-### Obtener usuarios simulados
-
-```http
-GET /api/mocks/users
-```
-
-Los usuarios se generan dinámicamente y no se persisten en MongoDB mediante este endpoint.
-
-Ejemplo de respuesta:
-
-```json
-{
-  "status": "success",
-  "payload": [
-    {
-      "firstName": "Tyler",
-      "lastName": "Lind",
-      "email": "example@gmail.com",
-      "password": "examplePassword",
-      "role": "CUSTOMER"
-    }
-  ]
-}
-```
-
-### Generar una cantidad determinada
-
-```http
-GET /api/mocks/users?qty=5
-```
-
-El parámetro `qty` determina la cantidad de usuarios simulados.
-
-El valor máximo permitido es:
-
-```text
-100
-```
-
-Si se supera el límite:
-
-```http
-GET /api/mocks/users?qty=101
-```
-
-la API responde:
-
-```json
-{
-  "status": "error",
-  "code": "MOCK_QUANTITY_EXCEEDED",
-  "message": "La cantidad de mocks supera el máximo permitido"
-}
-```
-
-También se valida que `qty` sea un número entero mayor que `0`.
-
----
-
-# Seed de datos
-
-El endpoint de seed permite generar datos de prueba y almacenarlos en MongoDB.
-
-```http
-POST /api/mocks/seed
-```
-
-También permite indicar la cantidad mediante `qty`.
-
-Ejemplo:
-
-```http
-POST /api/mocks/seed?qty=3
-```
-
-La operación genera datos relacionados entre sí:
-
-- Usuarios `CUSTOMER`.
-- Un usuario `DRIVER`.
-- Pedidos asociados a los clientes.
-- Entregas asociadas a los pedidos y al driver.
-
-Ejemplo de respuesta:
-
-```json
-{
-  "status": "success",
-  "message": "Datos de prueba generados correctamente",
-  "payload": {
-    "usuarios": 4,
-    "pedidos": 3,
-    "entregas": 3
-  }
-}
-```
-
-La cantidad de usuarios incluye los clientes generados más el driver utilizado para las entregas.
-
----
-
-# Manejo de errores
-
-El proyecto utiliza un sistema centralizado de manejo de errores para mantener respuestas HTTP uniformes y evitar lógica de errores dispersa entre los controllers.
-
-La estructura se encuentra en:
-
-```text
-src/errors/
-
-├── custom.error.js
-├── domain.errors.js
-├── error.dictionary.js
-└── error.middleware.js
-```
-
-## Flujo de errores
-
-```text
-Controller
-     ↓
-  Service
-     ↓
-Repository
-     ↓
-  Error
-     ↓
-Error Middleware
-     ↓
-Respuesta HTTP
-```
-
-Los errores de dominio se generan en la capa correspondiente y son procesados finalmente por el middleware global.
-
-Los controllers se encargan de las respuestas exitosas y delegan el manejo de errores al middleware.
-
-## CustomError
-
-`CustomError` es la clase base para los errores controlados de la aplicación.
-
-Los errores personalizados contienen:
-
-- Mensaje.
-- Código interno.
-- Código de estado HTTP.
-
-## Errores de dominio
-
-Actualmente se contemplan los siguientes errores:
-
-| Código                   | HTTP | Descripción                                                |
-| ------------------------ | ---: | ---------------------------------------------------------- |
-| `USER_NOT_FOUND`         |  404 | Usuario no encontrado                                      |
-| `PRODUCT_NOT_FOUND`      |  404 | Producto no encontrado                                     |
-| `INVALID_ID`             |  400 | El ID proporcionado no es válido                           |
-| `INVALID_MOCK_QUANTITY`  |  400 | La cantidad de mocks debe ser un número entero mayor que 0 |
-| `MOCK_QUANTITY_EXCEEDED` |  400 | La cantidad de mocks supera el máximo permitido            |
-| `DATABASE_ERROR`         |  500 | Error al procesar los datos en la base de datos            |
-| `INTERNAL_SERVER_ERROR`  |  500 | Error interno del servidor                                 |
-
-## Respuesta uniforme de error
-
-Todas las respuestas de error controladas utilizan la siguiente estructura:
+Los errores se centralizan mediante `CustomError`, un diccionario de errores y un middleware global. La respuesta mantiene esta estructura:
 
 ```json
 {
@@ -503,428 +101,31 @@ Todas las respuestas de error controladas utilizan la siguiente estructura:
 }
 ```
 
-## IDs inválidos
+Errores contemplados: `USER_NOT_FOUND`, `PRODUCT_NOT_FOUND`, `INVALID_ID`, `INVALID_MOCK_QUANTITY`, `MOCK_QUANTITY_EXCEEDED`, `DATABASE_ERROR` e `INTERNAL_SERVER_ERROR`.
 
-Los errores de tipo `CastError` generados por Mongoose al recibir un ID con formato inválido son transformados en `INVALID_ID` con HTTP `400 Bad Request`.
+## Logging con Winston
 
-Ejemplo:
+Winston registra eventos con fecha, hora y nivel. Los niveles configurados son `debug`, `http`, `info`, `warning`, `error` y `fatal`.
 
-```http
-GET /api/users/123
-```
+- **Desarrollo:** la consola muestra desde `debug`.
+- **Producción:** la consola muestra desde `info`.
+- `logs/application-AAAA-MM-DD.log`: registros generales con rotación diaria.
+- `logs/error.log`: registros de nivel `error` y `fatal`.
+- `logs/error-AAAA-MM-DD.log`: historial rotativo de errores.
 
-Respuesta:
+Los archivos de logs y auditoría se excluyen de Git mediante `.gitignore`.
 
-```json
-{
-  "status": "error",
-  "code": "INVALID_ID",
-  "message": "El ID proporcionado no es válido"
-}
-```
+### Probar el logger
 
-## Recursos inexistentes
+1. Iniciar el servidor con `npm run dev`.
+2. En Postman, ejecutar `GET http://localhost:3000/api/logger`.
+3. Confirmar la respuesta `200 OK`.
+4. Revisar la consola y los archivos dentro de `logs/`. `error.log` debe contener únicamente los niveles `error` y `fatal`.
 
-Cuando un usuario o producto no existe, el Service genera el error de dominio correspondiente.
+## Constantes y relaciones
 
-Ejemplo:
+Los roles, estados y prioridades están centralizados en `src/constants/index.js`. Los pedidos referencian al cliente mediante `ObjectId`; las entregas referencian al pedido y al conductor.
 
-```http
-GET /api/users/000000000000000000000000
-```
+## Git
 
-Respuesta:
-
-```json
-{
-  "status": "error",
-  "code": "USER_NOT_FOUND",
-  "message": "Usuario no encontrado"
-}
-```
-
-Ejemplo:
-
-```http
-GET /api/products/000000000000000000000000
-```
-
-Respuesta:
-
-```json
-{
-  "status": "error",
-  "code": "PRODUCT_NOT_FOUND",
-  "message": "Producto no encontrado"
-}
-```
-
----
-
-# Relaciones entre los datos
-
-Los datos generados por el seed mantienen relaciones mediante referencias de MongoDB.
-
-```text
-User (CUSTOMER)
-      ↓
-    Order
-      ↓
-   Delivery
-      ↓
-User (DRIVER)
-```
-
-Los pedidos contienen una referencia al usuario cliente:
-
-```text
-customer → ObjectId(User)
-```
-
-Las entregas contienen referencias al pedido y al conductor:
-
-```text
-order → ObjectId(Order)
-driver → ObjectId(User)
-```
-
-Esto permite generar datos de prueba coherentes con las relaciones definidas en los modelos.
-
----
-
-# Estados y prioridades
-
-Los valores utilizados por el dominio se encuentran centralizados en:
-
-```text
-src/constants/index.js
-```
-
-Se utilizan objetos inmutables mediante `Object.freeze()`.
-
-### Roles
-
-```js
-export const USER_ROLES = Object.freeze({
-  ADMIN: "ADMIN",
-  CUSTOMER: "CUSTOMER",
-  DRIVER: "DRIVER",
-  STORE: "STORE",
-});
-```
-
-### Estados de pedidos
-
-```js
-export const ORDER_STATUS = Object.freeze({
-  CREATED: "CREATED",
-  ASSIGNED: "ASSIGNED",
-  PICKED_UP: "PICKED_UP",
-  IN_TRANSIT: "IN_TRANSIT",
-  DELIVERED: "DELIVERED",
-  CANCELLED: "CANCELLED",
-});
-```
-
-### Estado de entregas
-
-```js
-export const DELIVERY_STATUS = Object.freeze({
-  ASSIGNED: "ASSIGNED",
-});
-```
-
-### Prioridades
-
-```js
-export const DELIVERY_PRIORITY = Object.freeze({
-  LOW: "LOW",
-  NORMAL: "NORMAL",
-  HIGH: "HIGH",
-});
-```
-
-Centralizar estos valores evita utilizar strings mágicos repetidos dentro de la aplicación.
-
----
-
-# Flujo del Mocking
-
-## Generación de usuarios
-
-```text
-GET /api/mocks/users
-        ↓
-MockController
-        ↓
-MockService
-        ↓
-Faker
-        ↓
-Datos simulados
-```
-
-Estos datos se generan en memoria y no se almacenan en MongoDB mediante este endpoint.
-
-## Seed
-
-```text
-POST /api/mocks/seed
-        ↓
-MockController
-        ↓
-MockService
-        ↓
-├──► UserRepository
-├──► OrderRepository
-└──► DeliveryRepository
-        ↓
-MongoDB
-```
-
----
-
-# Pruebas
-
-Los endpoints fueron probados utilizando **Postman**.
-
-## Usuarios
-
-Se verificaron:
-
-```http
-GET /api/users
-```
-
-```http
-GET /api/users/000000000000000000000000
-```
-
-Resultado esperado para un usuario inexistente:
-
-```text
-404 USER_NOT_FOUND
-```
-
-También se verificó el comportamiento ante un ID inválido:
-
-```http
-GET /api/users/123
-```
-
-Resultado:
-
-```text
-400 INVALID_ID
-```
-
-## Productos
-
-Se verificó:
-
-```http
-GET /api/products/000000000000000000000000
-```
-
-Resultado:
-
-```text
-404 PRODUCT_NOT_FOUND
-```
-
-## Mocking
-
-Se verificaron:
-
-```http
-GET /api/mocks/users
-```
-
-```http
-GET /api/mocks/users?qty=3
-```
-
-```http
-GET /api/mocks/users?qty=0
-```
-
-```http
-GET /api/mocks/users?qty=-5
-```
-
-```http
-GET /api/mocks/users?qty=101
-```
-
-Resultados:
-
-```text
-qty=0
-→ 400 INVALID_MOCK_QUANTITY
-
-qty=-5
-→ 400 INVALID_MOCK_QUANTITY
-
-qty=101
-→ 400 MOCK_QUANTITY_EXCEEDED
-```
-
-## Seed
-
-Se verificaron:
-
-```http
-POST /api/mocks/seed?qty=2
-```
-
-```http
-POST /api/mocks/seed?qty=0
-```
-
-```http
-POST /api/mocks/seed?qty=101
-```
-
-Resultados:
-
-```text
-qty=2
-→ 201 Created
-→ 3 usuarios
-→ 2 pedidos
-→ 2 entregas
-
-qty=0
-→ 400 INVALID_MOCK_QUANTITY
-
-qty=101
-→ 400 MOCK_QUANTITY_EXCEEDED
-```
-
-También se preparó el manejo de errores de base de datos durante el seed mediante `DatabaseError`.
-
----
-
-# Verificación de datos generados
-
-La funcionalidad de mocking puede verificarse de dos formas:
-
-### Postman
-
-1. Ejecutar `GET /api/mocks/users?qty=5`.
-2. Verificar que la respuesta tenga `status: "success"`.
-3. Confirmar que `payload` contenga la cantidad solicitada de usuarios.
-4. Ejecutar `POST /api/mocks/seed?qty=3`.
-5. Verificar que la respuesta indique:
-   - 4 usuarios.
-   - 3 pedidos.
-   - 3 entregas.
-
-### MongoDB Compass
-
-Después de ejecutar el seed, se pueden revisar las colecciones correspondientes para comprobar que:
-
-- Los usuarios fueron almacenados correctamente.
-- Existen usuarios con roles válidos.
-- Los pedidos tienen un `customer` válido.
-- Las entregas tienen un `order` válido.
-- Las entregas tienen un `driver` válido.
-- Los estados y prioridades corresponden a los valores definidos en las constantes.
-
-Las relaciones pueden comprobarse utilizando los `ObjectId` almacenados en cada documento.
-
----
-
-# Decisiones de arquitectura
-
-La separación entre Controller, Service y Repository permite mantener responsabilidades claras.
-
-El Controller administra la comunicación HTTP y las respuestas exitosas.
-
-El Service contiene la lógica de negocio, las validaciones de dominio y la generación de datos.
-
-El Repository encapsula el acceso a MongoDB mediante Mongoose.
-
-El manejo de errores se encuentra centralizado en una capa específica para evitar respuestas de error dispersas.
-
-De esta manera:
-
-```text
-Controller
-     ↓
-Service
-     ↓
-Repository
-     ↓
-MongoDB
-```
-
-La funcionalidad de mocking mantiene la misma separación de responsabilidades.
-
----
-
-# Variables de entorno
-
-No se deben almacenar credenciales ni configuraciones privadas directamente en el repositorio.
-
-El archivo:
-
-```text
-.env
-```
-
-está incluido en `.gitignore`.
-
-El repositorio contiene:
-
-```text
-.env.example
-```
-
-como referencia para configurar el entorno local.
-
----
-
-# Estado del proyecto
-
-Proyecto **Backend III**.
-
-## Módulo 1
-
-- Arquitectura por capas.
-- Separación Controller → Service → Repository.
-- Configuración de entorno centralizada.
-- Validación de variables de entorno.
-- Constantes de dominio.
-- Integración con MongoDB mediante Mongoose.
-- Refactorización de Products y Users.
-- `.env` excluido del repositorio.
-
-## Módulo 2
-
-- Generación de datos simulados con Faker.js.
-- Separación de la funcionalidad de mocking por capas.
-- Router dedicado `/api/mocks`.
-- Generación de usuarios simulados.
-- Generación de usuarios, pedidos y entregas mediante seed.
-- Persistencia de datos generados en MongoDB.
-- Relaciones mediante ObjectId.
-- Validación de cantidades generadas.
-- Uso de constantes para roles, estados y prioridades.
-- Verificación de datos mediante Postman y MongoDB Compass.
-
-## Módulo 3
-
-- Implementación de `CustomError`.
-- Diccionario centralizado de errores.
-- Errores de dominio personalizados.
-- Middleware global de manejo de errores.
-- Respuestas de error con estructura uniforme.
-- Manejo de usuarios inexistentes.
-- Manejo de productos inexistentes.
-- Manejo de IDs inválidos.
-- Validación centralizada de cantidades de mocks.
-- Manejo de cantidades de mocks fuera de los límites permitidos.
-- Manejo de errores de base de datos durante el seed.
-- Eliminación del manejo de errores HTTP disperso en los controllers.
-- Verificación de errores mediante Postman.
+El repositorio excluye `node_modules/`, `.env` y los archivos generados en `logs/`. Antes de entregar, verificar los cambios con `git status` y no incluir dependencias instaladas ni registros generados.
