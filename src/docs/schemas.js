@@ -174,26 +174,38 @@
  *
  *     ErrorResponse:
  *       type: object
+ *       required:
+ *         - status
+ *         - code
+ *         - message
  *       properties:
  *         status:
  *           type: string
+ *           enum: [error]
  *           example: error
  *         code:
  *           type: string
- *           example: USER_NOT_FOUND
+ *           description: Código que identifica el tipo de error.
+ *           example: INVALID_MOCK_QUANTITY
  *         message:
  *           type: string
- *           example: Usuario no encontrado
+ *           description: Descripción del error ocurrido.
+ *           example: La cantidad de mocks debe ser un número entero mayor que 0
  *
  *     SuccessResponse:
  *       type: object
  *       properties:
  *         status:
  *           type: string
+ *           enum: [success]
  *           example: success
  *         message:
  *           type: string
  *         payload:
- *           type: object
+ *           description: Datos devueltos por la operación; puede ser un objeto o una lista.
+ *           oneOf:
+ *             - type: object
+ *             - type: array
+ *               items: {}
  */
 export {};

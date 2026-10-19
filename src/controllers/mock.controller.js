@@ -5,31 +5,57 @@ class MockController {
     this.mockService = new MockService();
   }
 
-  getUsers = async (req, res) => {
-    const quantity = Number(req.query.qty ?? 1);
+  getUsers = async (req, res, next) => {
+    try {
+      const rawQuantity = req.query.qty;
+      const quantity = rawQuantity === undefined ? 1 : Number(rawQuantity);
 
-    const users = this.mockService.generateUsers(quantity);
+      if (!Number.isInteger(quantity) || quantity < 1) {
+        return res.status(400).json({
+          status: "error",
+          code: "INVALID_MOCK_QUANTITY",
+          message: "La cantidad de mocks debe ser un número entero mayor que 0",
+        });
+      }
 
-    res.status(200).json({
-      status: "success",
-      payload: users,
-    });
+      const users = this.mockService.generateUsers(quantity);
+
+      return res.status(200).json({
+        status: "success",
+        payload: users,
+      });
+    } catch (error) {
+      next(error);
+    }
   };
 
-  seed = async (req, res) => {
-    const quantity = Number(req.query.qty ?? 1);
+  seed = async (req, res, next) => {
+    try {
+      const rawQuantity = req.query.qty;
+      const quantity = rawQuantity === undefined ? 1 : Number(rawQuantity);
 
-    const result = await this.mockService.seed(quantity);
+      if (!Number.isInteger(quantity) || quantity < 1) {
+        return res.status(400).json({
+          status: "error",
+          code: "INVALID_MOCK_QUANTITY",
+          message: "La cantidad de mocks debe ser un número entero mayor que 0",
+        });
+      }
 
-    res.status(201).json({
-      status: "success",
-      message: "Datos de prueba generados correctamente",
-      payload: {
-        usuarios: result.customers.length + 1,
-        pedidos: result.orders.length,
-        entregas: result.deliveries.length,
-      },
-    });
+      const result = await this.mockService.seed(quantity);
+
+      return res.status(201).json({
+        status: "success",
+        message: "Datos de prueba generados correctamente",
+        payload: {
+          usuarios: result.customers.length + 1,
+          pedidos: result.orders.length,
+          entregas: result.deliveries.length,
+        },
+      });
+    } catch (error) {
+      next(error);
+    }
   };
 }
 

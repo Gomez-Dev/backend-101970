@@ -44,11 +44,9 @@ Iniciar el servidor en desarrollo:
 npm run dev
 ```
 
-La API estará disponible en:
+La API estará disponible en `http://localhost:3000`.
 
-`http://localhost:3000`
-
-Se necesita una instancia de MongoDB accesible con la URI configurada.
+Se necesita una instancia de MongoDB accesible mediante la URI configurada.
 
 ## Documentación interactiva con Swagger
 
@@ -56,25 +54,35 @@ La documentación de la API se encuentra en:
 
 **http://localhost:3000/api/docs**
 
-Swagger UI permite consultar los métodos HTTP, las rutas, los parámetros, los cuerpos de las solicitudes, las respuestas esperadas y los esquemas reutilizables.
+Swagger UI permite consultar los métodos HTTP, las rutas, los parámetros, los cuerpos de las solicitudes, las respuestas y los esquemas reutilizables.
 
-La documentación incluye los módulos Users, Products, Mocks y Logger. También define los esquemas de usuarios, productos, pedidos, entregas, artículos de pedido y respuestas de éxito y error.
+La documentación incluye los módulos Users, Products, Mocks y Logger, además de los esquemas de usuarios, productos, pedidos, entregas, artículos de pedido y respuestas de éxito y error.
 
-Orders y Deliveries cuentan con modelos y se generan mediante el endpoint de seed de Mocks. No se documentan rutas públicas independientes para esos recursos porque no se han confirmado endpoints propios.
+Orders y Deliveries cuentan con modelos utilizados durante la generación de datos de prueba mediante el endpoint de seed de Mocks. Actualmente no se exponen routers independientes para estos recursos en `src/app.js`.
 
-## Endpoints principales
+## Endpoints
+
+### Usuarios — `/api/users`
+
+| Método | Ruta             | Acción                    |
+| ------ | ---------------- | ------------------------- |
+| GET    | `/api/users`     | Listar usuarios           |
+| POST   | `/api/users`     | Crear un usuario          |
+| GET    | `/api/users/:id` | Obtener un usuario por ID |
+| PUT    | `/api/users/:id` | Actualizar un usuario     |
+| DELETE | `/api/users/:id` | Eliminar un usuario       |
 
 ### Productos — `/api/products`
 
-| Método | Ruta                | Acción                                |
-| ------ | ------------------- | ------------------------------------- |
-| GET    | `/api/products`     | Listar productos con stock disponible |
-| GET    | `/api/products/:id` | Obtener un producto por ID            |
-| POST   | `/api/products`     | Crear un producto                     |
-| PUT    | `/api/products/:id` | Actualizar un producto                |
-| DELETE | `/api/products/:id` | Eliminar un producto                  |
+| Método | Ruta                | Acción                       |
+| ------ | ------------------- | ---------------------------- |
+| GET    | `/api/products`     | Listar productos disponibles |
+| POST   | `/api/products`     | Crear un producto            |
+| GET    | `/api/products/:id` | Obtener un producto por ID   |
+| PUT    | `/api/products/:id` | Actualizar un producto       |
+| DELETE | `/api/products/:id` | Eliminar un producto         |
 
-Ejemplo de creación:
+Ejemplo de creación de un producto:
 
 ```json
 {
@@ -87,16 +95,6 @@ Ejemplo de creación:
 
 El servicio determina automáticamente el estado del producto según su stock.
 
-### Usuarios — `/api/users`
-
-| Método | Ruta             | Acción                    |
-| ------ | ---------------- | ------------------------- |
-| GET    | `/api/users`     | Listar usuarios           |
-| GET    | `/api/users/:id` | Obtener un usuario por ID |
-| POST   | `/api/users`     | Crear un usuario          |
-| PUT    | `/api/users/:id` | Actualizar un usuario     |
-| DELETE | `/api/users/:id` | Eliminar un usuario       |
-
 ### Mocks — `/api/mocks`
 
 | Método | Ruta                     | Acción                                           |
@@ -104,29 +102,28 @@ El servicio determina automáticamente el estado del producto según su stock.
 | GET    | `/api/mocks/users?qty=5` | Generar usuarios simulados en memoria            |
 | POST   | `/api/mocks/seed?qty=3`  | Insertar datos de prueba relacionados en MongoDB |
 
-El parámetro `qty` es opcional, tiene un valor predeterminado de `1` y debe ser un entero entre `1` y `100`.
+El parámetro `qty` es opcional, tiene un valor predeterminado de `1` y admite cantidades enteras entre `1` y `100`.
 
-El endpoint de usuarios simulados genera datos en memoria sin persistirlos en MongoDB.
+- **GET `/api/mocks/users`:** genera usuarios ficticios en memoria, sin persistirlos en MongoDB.
+- **POST `/api/mocks/seed`:** crea la cantidad indicada de clientes, un conductor, la misma cantidad de pedidos y entregas relacionadas.
 
-El endpoint de seed crea `qty` clientes, un conductor, `qty` pedidos y `qty` entregas relacionadas.
-
-Los errores de cantidad inválida o superior al máximo permitido responden con HTTP `400`. Los errores durante la inserción en la base de datos responden con HTTP `500`.
+Las cantidades inválidas o superiores al máximo permitido generan una respuesta HTTP `400`. Los errores durante la generación o persistencia de los datos se procesan mediante el middleware global de errores.
 
 ### Logger — `/loggerTest`
 
-El endpoint `GET /loggerTest` permite validar el sistema de logging de Winston. Genera registros de prueba para los niveles configurados y devuelve una respuesta de confirmación.
+El endpoint `GET /loggerTest` permite validar técnicamente el sistema de logging de Winston. Genera registros de prueba para los niveles configurados y devuelve una respuesta de confirmación.
 
 No realiza operaciones de negocio.
 
-Para probarlo, iniciar el servidor y acceder a:
+Para probarlo, acceder a:
 
 `http://localhost:3000/loggerTest`
 
-También se puede ejecutar desde Postman con el método `GET`.
+También puede ejecutarse desde Postman mediante el método `GET`.
 
 ## Manejo de errores
 
-Los errores se centralizan mediante `CustomError`, un diccionario de errores y un middleware global.
+Los errores se centralizan mediante las clases de error de dominio, el diccionario de errores y un middleware global.
 
 La respuesta de error utiliza la siguiente estructura:
 
@@ -138,7 +135,7 @@ La respuesta de error utiliza la siguiente estructura:
 }
 ```
 
-Entre los errores definidos se encuentran:
+Entre los códigos de error definidos se encuentran:
 
 - `USER_NOT_FOUND`
 - `PRODUCT_NOT_FOUND`
@@ -173,4 +170,7 @@ Los archivos de logs generados se excluyen de Git mediante `.gitignore`.
 
 Los roles, estados y prioridades están centralizados en `src/constants/index.js`.
 
-Los pedidos referencian al cliente mediante un `ObjectId`. Las entregas referencian al pedido y al conductor. Los modelos de pedidos y entregas se utilizan en la generación de datos de prueba.
+- Los pedidos referencian al cliente mediante un `ObjectId`.
+- Las entregas referencian al pedido y al conductor.
+- Los modelos de pedidos y entregas se utilizan en la generación de datos de prueba.
+- Los estados y prioridades se definen mediante constantes para mantener valores consistentes en la aplicación.

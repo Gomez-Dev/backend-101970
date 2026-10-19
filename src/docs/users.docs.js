@@ -2,16 +2,20 @@
  * @swagger
  * /api/users:
  *   get:
- *     tags: [Users]
+ *     tags:
+ *       - Users
  *     summary: Listar usuarios
  *     description: Obtiene todos los usuarios registrados.
  *     responses:
- *       200:
+ *       '200':
  *         description: Usuarios obtenidos correctamente.
  *         content:
  *           application/json:
  *             schema:
  *               type: object
+ *               required:
+ *                 - status
+ *                 - payload
  *               properties:
  *                 status:
  *                   type: string
@@ -20,7 +24,7 @@
  *                   type: array
  *                   items:
  *                     $ref: '#/components/schemas/User'
- *       500:
+ *       '500':
  *         description: Error interno del servidor.
  *         content:
  *           application/json:
@@ -28,7 +32,8 @@
  *               $ref: '#/components/schemas/ErrorResponse'
  *
  *   post:
- *     tags: [Users]
+ *     tags:
+ *       - Users
  *     summary: Crear un usuario
  *     description: Crea un usuario utilizando los datos enviados en el cuerpo.
  *     requestBody:
@@ -38,25 +43,28 @@
  *           schema:
  *             $ref: '#/components/schemas/UserInput'
  *     responses:
- *       201:
+ *       '201':
  *         description: Usuario creado correctamente.
  *         content:
  *           application/json:
  *             schema:
  *               type: object
+ *               required:
+ *                 - status
+ *                 - payload
  *               properties:
  *                 status:
  *                   type: string
  *                   example: success
  *                 payload:
  *                   $ref: '#/components/schemas/User'
- *       400:
- *         description: Datos inválidos, si la validación correspondiente genera este error.
+ *       '400':
+ *         description: Datos enviados inválidos, si la validación correspondiente genera este error.
  *         content:
  *           application/json:
  *             schema:
  *               $ref: '#/components/schemas/ErrorResponse'
- *       500:
+ *       '500':
  *         description: Error interno del servidor.
  *         content:
  *           application/json:
@@ -73,34 +81,38 @@
  *       description: Identificador MongoDB del usuario.
  *
  *   get:
- *     tags: [Users]
+ *     tags:
+ *       - Users
  *     summary: Obtener un usuario por ID
  *     responses:
- *       200:
+ *       '200':
  *         description: Usuario encontrado.
  *         content:
  *           application/json:
  *             schema:
  *               type: object
+ *               required:
+ *                 - status
+ *                 - payload
  *               properties:
  *                 status:
  *                   type: string
  *                   example: success
  *                 payload:
  *                   $ref: '#/components/schemas/User'
- *       400:
+ *       '400':
  *         description: El ID proporcionado no es válido.
  *         content:
  *           application/json:
  *             schema:
  *               $ref: '#/components/schemas/ErrorResponse'
- *       404:
+ *       '404':
  *         description: Usuario no encontrado.
  *         content:
  *           application/json:
  *             schema:
  *               $ref: '#/components/schemas/ErrorResponse'
- *       500:
+ *       '500':
  *         description: Error interno del servidor.
  *         content:
  *           application/json:
@@ -108,7 +120,8 @@
  *               $ref: '#/components/schemas/ErrorResponse'
  *
  *   put:
- *     tags: [Users]
+ *     tags:
+ *       - Users
  *     summary: Actualizar un usuario
  *     description: Actualiza un usuario existente con los datos enviados.
  *     requestBody:
@@ -118,21 +131,34 @@
  *           schema:
  *             $ref: '#/components/schemas/UserInput'
  *     responses:
- *       200:
+ *       '200':
  *         description: Usuario actualizado correctamente.
- *       400:
- *         description: El ID proporcionado no es válido.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               required:
+ *                 - status
+ *                 - payload
+ *               properties:
+ *                 status:
+ *                   type: string
+ *                   example: success
+ *                 payload:
+ *                   $ref: '#/components/schemas/User'
+ *       '400':
+ *         description: El ID proporcionado no es válido o los datos enviados no son aceptados por la validación correspondiente.
  *         content:
  *           application/json:
  *             schema:
  *               $ref: '#/components/schemas/ErrorResponse'
- *       404:
+ *       '404':
  *         description: Usuario no encontrado.
  *         content:
  *           application/json:
  *             schema:
  *               $ref: '#/components/schemas/ErrorResponse'
- *       500:
+ *       '500':
  *         description: Error interno del servidor.
  *         content:
  *           application/json:
@@ -140,24 +166,38 @@
  *               $ref: '#/components/schemas/ErrorResponse'
  *
  *   delete:
- *     tags: [Users]
+ *     tags:
+ *       - Users
  *     summary: Eliminar un usuario
  *     responses:
- *       200:
+ *       '200':
  *         description: Usuario eliminado correctamente.
- *       400:
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               required:
+ *                 - status
+ *                 - payload
+ *               properties:
+ *                 status:
+ *                   type: string
+ *                   example: success
+ *                 payload:
+ *                   $ref: '#/components/schemas/User'
+ *       '400':
  *         description: El ID proporcionado no es válido.
  *         content:
  *           application/json:
  *             schema:
  *               $ref: '#/components/schemas/ErrorResponse'
- *       404:
+ *       '404':
  *         description: Usuario no encontrado.
  *         content:
  *           application/json:
  *             schema:
  *               $ref: '#/components/schemas/ErrorResponse'
- *       500:
+ *       '500':
  *         description: Error interno del servidor.
  *         content:
  *           application/json:
