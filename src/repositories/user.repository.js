@@ -14,18 +14,28 @@ class UserRepository {
   }
 
   async create(data) {
-    return await User.create(data);
+    const user = await User.create(data);
+
+    return await User.findById(user._id).select("-password -__v");
   }
 
   async update(id, data) {
     return await User.findByIdAndUpdate(id, data, {
-      new: true,
+      returnDocument: "after",
       runValidators: true,
     }).select("-password -__v");
   }
 
   async delete(id) {
-    return await User.findByIdAndDelete(id);
+    const user = await User.findByIdAndDelete(id);
+
+    if (!user) return null;
+
+    const userData = user.toObject();
+    delete userData.password;
+    delete userData.__v;
+
+    return userData;
   }
 }
 

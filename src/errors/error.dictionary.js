@@ -9,6 +9,11 @@ export const ERROR_DICTIONARY = Object.freeze({
     statusCode: 404,
   },
 
+  ORDER_NOT_FOUND: {
+    message: "Pedido no encontrado",
+    statusCode: 404,
+  },
+
   INVALID_ID: {
     message: "El ID proporcionado no es válido",
     statusCode: 400,

@@ -34,6 +34,19 @@ const errorMiddleware = (error, req, res, next) => {
     });
   }
 
+  // Errores de validación de Mongoose
+  if (error.name === "ValidationError") {
+    logger.warning(
+      `VALIDATION_ERROR: ${error.message} - ${req.method} ${req.originalUrl}`,
+    );
+
+    return res.status(400).json({
+      status: "error",
+      code: "VALIDATION_ERROR",
+      message: "Los datos proporcionados no son válidos",
+    });
+  }
+
   logger.error(`${error.message} - ${req.method} ${req.originalUrl}`, {
     stack: error.stack,
   });

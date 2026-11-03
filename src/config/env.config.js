@@ -1,6 +1,8 @@
 import dotenv from "dotenv";
 
-dotenv.config();
+dotenv.config({
+  path: process.env.NODE_ENV === "test" ? ".env.test" : ".env",
+});
 
 const requiredEnvVariables = ["PORT", "MONGODB_URI", "NODE_ENV"];
 
@@ -12,6 +14,6 @@ for (const variable of requiredEnvVariables) {
 
 export const config = {
   port: Number(process.env.PORT),
-  mongodbUri: process.env.MONGODB_URI,
+  mongoUri: process.env.MONGODB_URI,
   nodeEnv: process.env.NODE_ENV,
 };

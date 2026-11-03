@@ -21,6 +21,16 @@ export class ProductNotFoundError extends CustomError {
   }
 }
 
+export class OrderNotFoundError extends CustomError {
+  constructor() {
+    super(
+      ERROR_DICTIONARY.ORDER_NOT_FOUND.message,
+      "ORDER_NOT_FOUND",
+      ERROR_DICTIONARY.ORDER_NOT_FOUND.statusCode,
+    );
+  }
+}
+
 export class InvalidIdError extends CustomError {
   constructor() {
     super(

@@ -40,6 +40,7 @@
  *         role:
  *           type: string
  *           enum: [ADMIN, CUSTOMER, DRIVER, STORE]
+ *           example: CUSTOMER
  *           description: Campo sujeto a las reglas de autorización del endpoint.
  *
  *     Product:
@@ -110,7 +111,6 @@
  *       type: object
  *       required:
  *         - customer
- *         - items
  *         - deliveryAddress
  *         - total
  *       properties:
@@ -142,6 +142,32 @@
  *         updatedAt:
  *           type: string
  *           format: date-time
+ *
+ *     OrderInput:
+ *       type: object
+ *       required:
+ *         - customer
+ *         - deliveryAddress
+ *         - total
+ *       properties:
+ *         customer:
+ *           type: string
+ *           description: Identificador del usuario cliente.
+ *         items:
+ *           type: array
+ *           items:
+ *             $ref: '#/components/schemas/OrderItem'
+ *         deliveryAddress:
+ *           type: string
+ *         total:
+ *           type: number
+ *           minimum: 0
+ *         status:
+ *           type: string
+ *           enum: [CREATED, ASSIGNED, PICKED_UP, IN_TRANSIT, DELIVERED, CANCELLED]
+ *         priority:
+ *           type: string
+ *           enum: [LOW, NORMAL, HIGH]
  *
  *     Delivery:
  *       type: object
@@ -186,11 +212,11 @@
  *         code:
  *           type: string
  *           description: Código que identifica el tipo de error.
- *           example: INVALID_MOCK_QUANTITY
+ *           example: INTERNAL_SERVER_ERROR
  *         message:
  *           type: string
  *           description: Descripción del error ocurrido.
- *           example: La cantidad de mocks debe ser un número entero mayor que 0
+ *           example: Error interno del servidor.
  *
  *     SuccessResponse:
  *       type: object

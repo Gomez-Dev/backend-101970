@@ -15,7 +15,7 @@ class ProductRepository {
 
   async update(id, data) {
     return await Product.findByIdAndUpdate(id, data, {
-      new: true,
+      returnDocument: "after",
       runValidators: true,
     }).select("-__v");
   }

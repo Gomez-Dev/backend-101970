@@ -60,6 +60,68 @@
  *             schema:
  *               $ref: '#/components/schemas/ErrorResponse'
  *
+ * /api/mocks/orders:
+ *   get:
+ *     tags:
+ *       - Mocks
+ *     summary: Generar pedidos simulados
+ *     description: >
+ *       Genera pedidos ficticios en memoria sin persistirlos en MongoDB.
+ *       Los identificadores de clientes son simulados y no representan
+ *       necesariamente usuarios existentes en la base de datos.
+ *       Si no se indica qty, se utiliza 1. El valor debe ser un entero
+ *       entre 1 y 100.
+ *     parameters:
+ *       - in: query
+ *         name: qty
+ *         required: false
+ *         description: Cantidad de pedidos simulados a generar.
+ *         schema:
+ *           type: integer
+ *           default: 1
+ *           minimum: 1
+ *           maximum: 100
+ *     responses:
+ *       '200':
+ *         description: Pedidos simulados generados correctamente.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 status:
+ *                   type: string
+ *                   example: success
+ *                 payload:
+ *                   type: array
+ *                   items:
+ *                     $ref: '#/components/schemas/Order'
+ *       '400':
+ *         description: Cantidad inválida o superior al máximo permitido.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
+ *             examples:
+ *               invalidQuantity:
+ *                 summary: Cantidad inválida
+ *                 value:
+ *                   status: error
+ *                   code: INVALID_MOCK_QUANTITY
+ *                   message: La cantidad de mocks debe ser un número entero mayor que 0
+ *               quantityExceeded:
+ *                 summary: Cantidad superior al máximo
+ *                 value:
+ *                   status: error
+ *                   code: MOCK_QUANTITY_EXCEEDED
+ *                   message: La cantidad de mocks supera el máximo permitido
+ *       '500':
+ *         description: Error interno del servidor.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
+ *
  * /api/mocks/seed:
  *   post:
  *     tags:
@@ -67,6 +129,7 @@
  *     summary: Insertar datos de prueba en MongoDB
  *     description: >
  *       Crea qty clientes, un conductor, qty pedidos y qty entregas relacionadas.
+ *       No requiere body. La cantidad se recibe mediante el parámetro query qty.
  *       Si no se indica qty, se utiliza 1. El valor debe ser un entero entre
  *       1 y 100. La operación persiste los datos en MongoDB.
  *     parameters:

@@ -102,6 +102,22 @@ class MockService {
     return users;
   }
 
+  generateOrders(quantity) {
+    this.validateQuantity(quantity);
+
+    logger.debug(`Generando ${quantity} pedidos simulados`);
+
+    const orders = Array.from({ length: quantity }, () => {
+      const customerId = faker.database.mongodbObjectId();
+
+      return this.generateMockOrder(customerId);
+    });
+
+    logger.info(`Se generaron ${orders.length} pedidos simulados`);
+
+    return orders;
+  }
+
   async seed(quantity) {
     this.validateQuantity(quantity);
 

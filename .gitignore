@@ -1,6 +1,10 @@
+# Dependencias
 node_modules/
-.env
 
-# Logs generados por winston
+# Variables de entorno
+.env
+.env.test
+
+# Logs generados por Winston
 logs/*.log
 logs/*.json

@@ -25,7 +25,31 @@ class MockController {
         payload: users,
       });
     } catch (error) {
-      next(error);
+      return next(error);
+    }
+  };
+
+  getOrders = async (req, res, next) => {
+    try {
+      const rawQuantity = req.query.qty;
+      const quantity = rawQuantity === undefined ? 1 : Number(rawQuantity);
+
+      if (!Number.isInteger(quantity) || quantity < 1) {
+        return res.status(400).json({
+          status: "error",
+          code: "INVALID_MOCK_QUANTITY",
+          message: "La cantidad de mocks debe ser un número entero mayor que 0",
+        });
+      }
+
+      const orders = this.mockService.generateOrders(quantity);
+
+      return res.status(200).json({
+        status: "success",
+        payload: orders,
+      });
+    } catch (error) {
+      return next(error);
     }
   };
 
@@ -54,7 +78,7 @@ class MockController {
         },
       });
     } catch (error) {
-      next(error);
+      return next(error);
     }
   };
 }
