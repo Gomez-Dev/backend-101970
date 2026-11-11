@@ -42,4 +42,13 @@ describe("Documentación Swagger", () => {
     expect(response.headers["content-type"]).to.include("text/html");
     expect(response.text).to.include("swagger-ui");
   });
+
+  it("Debe devolver 404 cuando se accede a una ruta inexistente de Swagger", async () => {
+    const response = await request(app).get("/api/docs-inexistente");
+
+    expect(response.status).to.equal(404);
+    expect(response.body.status).to.equal("error");
+    expect(response.body.code).to.equal("ROUTE_NOT_FOUND");
+    expect(response.body.message).to.equal("Ruta no encontrada");
+  });
 });
