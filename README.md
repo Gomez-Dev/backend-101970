@@ -12,6 +12,7 @@ API REST desarrollada con Node.js, Express y MongoDB para gestionar usuarios, pr
 - Faker.js
 - Winston
 - Swagger / OpenAPI
+- Multer
 - Postman
 
 ## Arquitectura
@@ -24,8 +25,9 @@ API REST desarrollada con Node.js, Express y MongoDB para gestionar usuarios, pr
 - **Repository:** encapsula el acceso a MongoDB.
 - **Model:** define los esquemas y las validaciones de los documentos.
 - **Errors:** centraliza los errores de dominio y el middleware global.
-- **Config:** centraliza la configuración del entorno, Swagger, base de datos y Winston.
+- **Config:** centraliza la configuración del entorno, Swagger, base de datos, Winston y Multer.
 - **Docs:** contiene la documentación OpenAPI de los endpoints y esquemas.
+- **Middlewares:** contiene los middlewares de validación y procesamiento de solicitudes, incluida la carga de archivos.
 
 ## Instalación y ejecución
 
@@ -33,7 +35,9 @@ Clonar el repositorio e instalar las dependencias:
 
 ```bash
 git clone https://github.com/Gomez-Dev/backend-101970.git
+
 cd backend-101970
+
 npm install
 ```
 
@@ -41,7 +45,9 @@ Crear un archivo `.env` en la raíz del proyecto:
 
 ```env
 PORT=3000
+
 MONGODB_URI=mongodb://127.0.0.1:27017/shipnow
+
 NODE_ENV=development
 ```
 
@@ -71,17 +77,20 @@ Swagger UI permite consultar los métodos HTTP, las rutas, los parámetros, los 
 
 La documentación incluye los módulos Users, Products, Orders, Deliveries, Mocks y Logger, además de esquemas reutilizables para usuarios, productos, pedidos, entregas, artículos de pedido y respuestas de éxito y error.
 
+También documenta los endpoints de carga de archivos mediante `multipart/form-data`.
+
 ## Endpoints
 
 ### Usuarios — `/api/users`
 
-| Método | Ruta             | Acción                    |
-| ------ | ---------------- | ------------------------- |
-| GET    | `/api/users`     | Listar usuarios           |
-| POST   | `/api/users`     | Crear un usuario          |
-| GET    | `/api/users/:id` | Obtener un usuario por ID |
-| PUT    | `/api/users/:id` | Actualizar un usuario     |
-| DELETE | `/api/users/:id` | Eliminar un usuario       |
+| Método | Ruta                       | Acción                         |
+| ------ | -------------------------- | ------------------------------ |
+| GET    | `/api/users`               | Listar usuarios                |
+| POST   | `/api/users`               | Crear un usuario               |
+| GET    | `/api/users/:id`           | Obtener un usuario por ID      |
+| PUT    | `/api/users/:id`           | Actualizar un usuario          |
+| DELETE | `/api/users/:id`           | Eliminar un usuario            |
+| POST   | `/api/users/:id/documents` | Cargar un documento de usuario |
 
 ### Productos — `/api/products`
 
@@ -119,14 +128,118 @@ Los pedidos contienen información del cliente, artículos, dirección de entreg
 
 ### Entregas — `/api/deliveries`
 
-| Método | Ruta              | Acción            |
-| ------ | ----------------- | ----------------- |
-| GET    | `/api/deliveries` | Listar entregas   |
-| POST   | `/api/deliveries` | Crear una entrega |
+| Método | Ruta                           | Acción                           |
+| ------ | ------------------------------ | -------------------------------- |
+| GET    | `/api/deliveries`              | Listar entregas                  |
+| POST   | `/api/deliveries`              | Crear una entrega                |
+| POST   | `/api/deliveries/:id/receipts` | Cargar un comprobante de entrega |
 
 Las entregas relacionan un pedido con un conductor y contemplan estados y prioridades definidos mediante constantes.
 
-### Mocks — `/api/mocks`
+## Carga de archivos — Multer
+
+El proyecto incorpora Multer para gestionar la carga de documentos y comprobantes mediante solicitudes `multipart/form-data`.
+
+Los archivos se almacenan físicamente en el servidor y sus metadatos se registran en MongoDB, asociados a la entidad correspondiente.
+
+### Tipos de archivos permitidos
+
+- PDF
+- JPG
+- JPEG
+- PNG
+
+**Tamaño máximo permitido: 5 MB por archivo.**
+
+### Documentos de usuarios
+
+Endpoint:
+
+```http
+POST /api/users/:id/documents
+```
+
+Parámetros:
+
+| Campo          | Tipo   | Descripción                       |
+| -------------- | ------ | --------------------------------- |
+| `id`           | Path   | Identificador MongoDB del usuario |
+| `file`         | File   | Archivo PDF, JPG, JPEG o PNG      |
+| `documentType` | String | Tipo de documento                 |
+
+Tipos de documentos admitidos:
+
+- `DNI`
+- `DRIVER_LICENSE`
+- `ADDRESS_PROOF`
+
+Ejemplo de solicitud mediante Postman:
+
+- Método: `POST`
+- URL: `/api/users/:id/documents`
+- Body: `form-data`
+- Campo `file`: seleccionar el archivo.
+- Campo `documentType`: indicar el tipo de documento.
+
+### Comprobantes de entregas
+
+Endpoint:
+
+```http
+POST /api/deliveries/:id/receipts
+```
+
+Parámetros:
+
+| Campo  | Tipo | Descripción                         |
+| ------ | ---- | ----------------------------------- |
+| `id`   | Path | Identificador MongoDB de la entrega |
+| `file` | File | Archivo PDF, JPG, JPEG o PNG        |
+
+Se permite asociar múltiples comprobantes a una misma entrega mediante solicitudes sucesivas.
+
+### Metadatos almacenados
+
+MongoDB almacena los metadatos de los archivos, no su contenido binario.
+
+La información registrada incluye:
+
+- Nombre original.
+- Nombre generado para el archivo.
+- Ruta de almacenamiento.
+- Tipo MIME.
+- Tamaño en bytes.
+- Tipo de documento, cuando corresponde.
+- Fecha de carga.
+
+Los archivos se organizan en las siguientes carpetas:
+
+```text
+uploads/
+├── users/
+└── deliveries/
+```
+
+La configuración de Multer se encuentra centralizada y separada de los routers.
+
+La carpeta `uploads/` está excluida del repositorio mediante `.gitignore`, evitando subir archivos cargados por los usuarios a GitHub.
+
+### Validaciones de carga
+
+La implementación contempla:
+
+- Archivo obligatorio.
+- Formatos permitidos.
+- Tamaño máximo de 5 MB.
+- Validación del campo esperado (`file`).
+- Validación del tipo de documento.
+- Verificación de existencia del usuario o entrega.
+- Manejo de errores durante el almacenamiento y asociación de archivos.
+- Eliminación del archivo físico cuando ocurre un error durante su persistencia.
+
+Los errores de carga se integran con el sistema centralizado de manejo de errores.
+
+## Mocks — `/api/mocks`
 
 | Método | Ruta                      | Acción                              |
 | ------ | ------------------------- | ----------------------------------- |
@@ -142,7 +255,7 @@ El parámetro `qty` es opcional, tiene un valor predeterminado de `1` y admite c
 
 Las cantidades inválidas o superiores al máximo permitido generan una respuesta HTTP `400`.
 
-### Logger — `/loggerTest`
+## Logger — `/loggerTest`
 
 El endpoint `GET /loggerTest` permite validar el sistema de logging de Winston.
 
@@ -175,6 +288,7 @@ Entre los códigos de error definidos se encuentran:
 - `USER_NOT_FOUND`
 - `PRODUCT_NOT_FOUND`
 - `ORDER_NOT_FOUND`
+- `DELIVERY_NOT_FOUND`
 - `INVALID_ID`
 - `INVALID_MOCK_QUANTITY`
 - `MOCK_QUANTITY_EXCEEDED`
@@ -182,6 +296,12 @@ Entre los códigos de error definidos se encuentran:
 - `INTERNAL_SERVER_ERROR`
 - `ROUTE_NOT_FOUND`
 - `VALIDATION_ERROR`
+- `FILE_REQUIRED`
+- `INVALID_FILE_TYPE`
+- `FILE_TOO_LARGE`
+- `UNEXPECTED_FILE_FIELD`
+- `INVALID_DOCUMENT_TYPE`
+- `FILE_SAVE_ERROR`
 
 Los errores de validación de Mongoose se responden con HTTP `400` y código `VALIDATION_ERROR`.
 
@@ -217,7 +337,9 @@ Crear un archivo `.env.test` en la raíz del proyecto:
 
 ```env
 PORT=3001
+
 MONGODB_URI=mongodb://127.0.0.1:27017/shipnow_test
+
 NODE_ENV=test
 ```
 
@@ -225,7 +347,15 @@ El entorno de testing utiliza una base de datos independiente de la utilizada du
 
 El archivo `tests/setup.js` configura la conexión a MongoDB, limpia la base de datos antes de cada prueba y cierra la conexión al finalizar la ejecución.
 
-El archivo `.env.test` no debe subirse al repositorio. Se recomienda proporcionar un archivo `.env.test.example` como referencia.
+El archivo `.env.test` no debe subirse al repositorio. Se proporciona un archivo `.env.test.example` como referencia.
+
+Para configurar el entorno de pruebas:
+
+```bash
+cp .env.test.example .env.test
+```
+
+En Windows también puede copiarse manualmente el archivo `.env.test.example` y renombrar la copia como `.env.test`.
 
 ### Ejecutar las pruebas
 
@@ -243,15 +373,27 @@ La instancia de MongoDB debe estar disponible y el entorno de testing debe estar
 
 Las pruebas funcionales contemplan:
 
-- **Users:** creación, consulta, actualización, eliminación y validaciones.
+- **Users:** creación, consulta, actualización, eliminación, validaciones y carga de documentos.
+- **Products:** operaciones y validaciones del recurso.
 - **Orders:** creación, listado, consulta por ID, actualización de estado y validaciones.
-- **Deliveries:** creación, listado, valores predeterminados y validaciones.
+- **Deliveries:** creación, listado, valores predeterminados, validaciones y carga de comprobantes.
 - **Mocks:** generación de usuarios y pedidos, validación de cantidades y persistencia mediante seed.
 - **Logger:** verificación de la respuesta del endpoint y sus niveles de logging.
 - **Swagger:** generación de la especificación OpenAPI, presencia de los endpoints documentados y acceso HTTP a Swagger UI.
 - **Aplicación:** verificación de respuestas HTTP `404` para rutas inexistentes.
 
-En la última ejecución se obtuvieron **41 pruebas aprobadas**.
+Las pruebas de carga de archivos verifican, entre otros escenarios:
+
+- Carga correcta de documentos y comprobantes.
+- Rechazo de solicitudes sin archivos.
+- Rechazo de formatos no permitidos.
+- Rechazo de tipos de documento inválidos.
+- Rechazo de archivos que superan el tamaño máximo.
+- Rechazo de campos de archivo incorrectos.
+- Rechazo de comprobantes asociados a entregas inexistentes.
+- Asociación de múltiples comprobantes a una misma entrega.
+
+**Última ejecución registrada: 52 pruebas aprobadas.**
 
 ## Logging con Winston
 
@@ -267,6 +409,8 @@ Los niveles configurados son `debug`, `http`, `info`, `warning`, `error` y `fata
 
 Los archivos de logs generados se excluyen de Git mediante `.gitignore`.
 
+El sistema también registra eventos relacionados con la carga de archivos, incluyendo cargas exitosas, errores, intentos de carga de formatos no permitidos y asociación de comprobantes a entregas.
+
 ## Modelos, relaciones y constantes
 
 Los roles, estados y prioridades están centralizados en `src/constants/index.js`.
@@ -274,4 +418,18 @@ Los roles, estados y prioridades están centralizados en `src/constants/index.js
 - Los pedidos referencian al cliente mediante un `ObjectId`.
 - Las entregas referencian al pedido y al conductor.
 - Los modelos de pedidos y entregas se utilizan en la generación de datos de prueba.
+- Los documentos se asocian al modelo de usuario.
+- Los comprobantes se asocian al modelo de entrega.
 - Los estados y prioridades se definen mediante constantes para mantener valores consistentes en la aplicación.
+
+## Control de versiones
+
+El repositorio excluye archivos que no deben compartirse, como:
+
+- `node_modules/`
+- `.env`
+- `.env.test`
+- Archivos de logs generados.
+- Archivos cargados por usuarios en `uploads/`.
+
+Los archivos de ejemplo de configuración se mantienen disponibles para facilitar la instalación y ejecución del proyecto.

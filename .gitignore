@@ -8,3 +8,6 @@ node_modules/
 # Logs generados por Winston
 logs/*.log
 logs/*.json
+
+# Archivos subidos por los usuarios
+uploads/

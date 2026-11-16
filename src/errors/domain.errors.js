@@ -70,3 +70,13 @@ export class DatabaseError extends CustomError {
     );
   }
 }
+
+export class DeliveryNotFoundError extends CustomError {
+  constructor() {
+    super(
+      ERROR_DICTIONARY.DELIVERY_NOT_FOUND.message,
+      "DELIVERY_NOT_FOUND",
+      ERROR_DICTIONARY.DELIVERY_NOT_FOUND.statusCode,
+    );
+  }
+}

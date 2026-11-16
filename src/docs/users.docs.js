@@ -59,7 +59,7 @@
  *                 payload:
  *                   $ref: '#/components/schemas/User'
  *       '400':
- *         description: Datos enviados inválidos, si la validación correspondiente genera este error.
+ *         description: Datos enviados inválidos.
  *         content:
  *           application/json:
  *             schema:
@@ -147,7 +147,7 @@
  *                 payload:
  *                   $ref: '#/components/schemas/User'
  *       '400':
- *         description: El ID proporcionado no es válido o los datos enviados no son aceptados por la validación correspondiente.
+ *         description: El ID proporcionado no es válido o los datos enviados son incorrectos.
  *         content:
  *           application/json:
  *             schema:
@@ -203,5 +203,76 @@
  *           application/json:
  *             schema:
  *               $ref: '#/components/schemas/ErrorResponse'
+ *
+ * /api/users/{id}/documents:
+ *   post:
+ *     tags:
+ *       - Users
+ *     summary: Cargar un documento de usuario
+ *     description: Permite cargar documentos PDF, JPG, JPEG o PNG asociados a un usuario. El tamaño máximo permitido es de 5 MB.
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         description: Identificador MongoDB del usuario.
+ *         schema:
+ *           type: string
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         multipart/form-data:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - file
+ *               - documentType
+ *             properties:
+ *               file:
+ *                 type: string
+ *                 format: binary
+ *                 description: Archivo PDF, JPG, JPEG o PNG. Máximo 5 MB.
+ *               documentType:
+ *                 type: string
+ *                 description: Tipo de documento que se está cargando.
+ *                 enum:
+ *                   - DNI
+ *                   - DRIVER_LICENSE
+ *                   - ADDRESS_PROOF
+ *                 example: DNI
+ *     responses:
+ *       '200':
+ *         description: Documento cargado correctamente y asociado al usuario.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 status:
+ *                   type: string
+ *                   example: success
+ *                 message:
+ *                   type: string
+ *                   example: Documento cargado correctamente
+ *                 payload:
+ *                   $ref: '#/components/schemas/User'
+ *       '400':
+ *         description: Archivo faltante, formato no permitido, tamaño excedido o tipo de documento inválido.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
+ *       '404':
+ *         description: Usuario no encontrado.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
+ *       '500':
+ *         description: Error al guardar el archivo.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
  */
+
 export {};

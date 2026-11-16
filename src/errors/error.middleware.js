@@ -1,9 +1,11 @@
+import multer from "multer";
 import CustomError from "./custom.error.js";
 import { InvalidIdError } from "./domain.errors.js";
 import { ERROR_DICTIONARY } from "./error.dictionary.js";
 import logger from "../config/logger.config.js";
 
 const errorMiddleware = (error, req, res, next) => {
+  // Errores personalizados de la aplicación
   if (error instanceof CustomError) {
     if (error.statusCode >= 500) {
       logger.error(
@@ -22,6 +24,32 @@ const errorMiddleware = (error, req, res, next) => {
     });
   }
 
+  // Errores propios de Multer
+  if (error instanceof multer.MulterError) {
+    let errorCode = "FILE_SAVE_ERROR";
+
+    if (error.code === "LIMIT_FILE_SIZE") {
+      errorCode = "FILE_TOO_LARGE";
+    }
+
+    if (error.code === "LIMIT_UNEXPECTED_FILE") {
+      errorCode = "UNEXPECTED_FILE_FIELD";
+    }
+
+    const errorData = ERROR_DICTIONARY[errorCode];
+
+    logger.warning(
+      `${errorCode}: ${error.message} - ${req.method} ${req.originalUrl}`,
+    );
+
+    return res.status(errorData.statusCode).json({
+      status: "error",
+      code: errorCode,
+      message: errorData.message,
+    });
+  }
+
+  // Errores de identificadores de MongoDB
   if (error.name === "CastError") {
     const invalidIdError = new InvalidIdError();
 
@@ -47,6 +75,7 @@ const errorMiddleware = (error, req, res, next) => {
     });
   }
 
+  // Errores no contemplados
   logger.error(`${error.message} - ${req.method} ${req.originalUrl}`, {
     stack: error.stack,
   });

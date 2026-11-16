@@ -37,6 +37,17 @@ class UserRepository {
 
     return userData;
   }
+
+  async addDocument(id, documentData) {
+    return await User.findByIdAndUpdate(
+      id,
+      { $push: { documents: documentData } },
+      {
+        returnDocument: "after",
+        runValidators: true,
+      },
+    ).select("-password -__v");
+  }
 }
 
 export default UserRepository;

@@ -1,8 +1,10 @@
 import UserService from "../services/user.service.js";
+import UploadService from "../services/upload.service.js";
 
 class UserController {
   constructor() {
     this.userService = new UserService();
+    this.uploadService = new UploadService();
   }
 
   getUsers = async (req, res) => {
@@ -46,6 +48,20 @@ class UserController {
 
     res.status(200).json({
       status: "success",
+      payload: user,
+    });
+  };
+
+  uploadDocument = async (req, res) => {
+    const user = await this.uploadService.uploadUserDocument(
+      req.params.id,
+      req.file,
+      req.body.documentType,
+    );
+
+    res.status(200).json({
+      status: "success",
+      message: "Documento cargado correctamente",
       payload: user,
     });
   };

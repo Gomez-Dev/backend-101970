@@ -8,6 +8,21 @@ class DeliveryRepository {
   async getAll() {
     return await Delivery.find().select("-__v");
   }
+
+  async getById(id) {
+    return await Delivery.findById(id).select("-__v");
+  }
+
+  async addReceipt(id, receiptData) {
+    return await Delivery.findByIdAndUpdate(
+      id,
+      { $push: { receipts: receiptData } },
+      {
+        returnDocument: "after",
+        runValidators: true,
+      },
+    ).select("-__v");
+  }
 }
 
 export default DeliveryRepository;
